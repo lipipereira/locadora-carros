@@ -13,4 +13,23 @@ class Brand extends Model
         'name',
         'image'
     ];
+
+    public function rules()
+    {
+        return [
+            'name' => [
+                'required',
+                'unique:brands,name,' . $this->id
+            ],
+            'image' => ['required']
+        ];
+    }
+
+    public function feedback()
+    {
+        return [
+            'required' => 'O campo :attribute é obrigatório',
+            'name.unique' => 'O nome da marca já existe'
+        ];
+    }
 }
