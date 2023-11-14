@@ -21,7 +21,11 @@ class Brand extends Model
                 'required',
                 'unique:brands,name,' . $this->id
             ],
-            'image' => ['required']
+            'image' => [
+                'required',
+                'file',
+                'mimes:png'
+            ]
         ];
     }
 
@@ -29,7 +33,8 @@ class Brand extends Model
     {
         return [
             'required' => 'O campo :attribute é obrigatório',
-            'name.unique' => 'O nome da marca já existe'
+            'name.unique' => 'O nome da marca já existe',
+            'image.mimes' => 'A imagem dever ser do tipo PNG'
         ];
     }
 }

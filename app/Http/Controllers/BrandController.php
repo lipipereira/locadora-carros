@@ -31,11 +31,16 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         $request->validate($this->brand->rules(), $this->brand->feedback());
+        $image = $request->file('image');
+        //$image->store('images');
+        $image_urn = $image->store('images', 'public');
 
-        return response()->json(
-            $this->brand->create($request->all()),
-            Response::HTTP_CREATED
-        );
+        $brand = $this->brand->create([
+            'name' => $request->name,
+            'image' => $image_urn
+        ]);
+
+        return response()->json($brand, Response::HTTP_CREATED);
     }
 
     /**
