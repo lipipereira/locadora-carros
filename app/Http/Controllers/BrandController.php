@@ -12,15 +12,7 @@ class BrandController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return Brand::all();
     }
 
     /**
@@ -28,7 +20,7 @@ class BrandController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return Brand::create($request->all());
     }
 
     /**
@@ -36,15 +28,7 @@ class BrandController extends Controller
      */
     public function show(Brand $brand)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Brand $brand)
-    {
-        //
+        return $brand;
     }
 
     /**
@@ -52,7 +36,7 @@ class BrandController extends Controller
      */
     public function update(Request $request, Brand $brand)
     {
-        //
+        return $brand->update($request->all());
     }
 
     /**
@@ -60,6 +44,7 @@ class BrandController extends Controller
      */
     public function destroy(Brand $brand)
     {
-        //
+        $brand->delete();
+        return ['mensagem' => 'Marca removida com sucesso!'];
     }
 }
