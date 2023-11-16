@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarModel;
+use App\Repositories\ModelRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -19,36 +20,25 @@ class CarModelController extends Controller
      */
     public function index(Request $request)
     {
-        $carModels = array();
+        $modelRepository = new ModelRepository($this->carModel);
+
         if ($request->has('attributes_brand')) {
-            $attributes_brand = $request->attributes_brand;
-            $carModels = $this->carModel->with('brand:id,' . $attributes_brand);
+            $attributes_brand = 'brand:id,' . $request->attributes_brand;
+            $modelRepository->selectAttributesRegistrationRelated($attributes_brand);
         } else {
-            $carModels = $this->carModel->with('brand');
+            $modelRepository->selectAttributesRegistrationRelated('brand');
         }
 
         if ($request->has('filter')) {
-            $filters = explode(';', $request->filter);
-            foreach ($filters as $key => $filter) {
-                $where = explode(':', $filter);
-                $carModels = $carModels->where($where[0], $where[1], $where[2]);
-            }
-        } else {
-            $carModels = $this->carModel->get();
+            $modelRepository->filter($request->filter);
         }
 
-        if ($request->has('attributes_model')) {
-            $attributes_model = $request->attributes_model;
-            $carModels = $carModels
-                ->selectRaw($attributes_model)
-                ->get();
-        } else {
-            $carModels = $carModels->get();
+        if ($request->has('attributes_models')) {
+            $modelRepository->selectAttributes($request->attributes_models);
         }
 
         return response()->json(
-            $carModels,
-            //$this->carModel->with('brand')->get(),
+            $modelRepository->getResult(),
             Response::HTTP_OK
         );
     }

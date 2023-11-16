@@ -17,10 +17,10 @@ return new class extends Migration
             $table->unsignedBigInteger('car_id');
             $table->dateTime('start_date_period');
             $table->dateTime('final_date_expected_period');
-            $table->dateTime('end_date_realized_period');
+            $table->dateTime('end_date_realized_period')->nullable();
             $table->float('daily_value', 8, 2);
             $table->integer('initial_km');
-            $table->integer('km_final');
+            $table->integer('km_final')->nullable();
             $table->timestamps();
 
             //foreign key (constraints)
