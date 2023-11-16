@@ -37,4 +37,9 @@ class Brand extends Model
             'image.mimes' => 'A imagem dever ser do tipo PNG'
         ];
     }
+
+    public function carModels()
+    {
+        return $this->hasMany('App\Models\CarModel', 'brand_id', 'id');
+    }
 }

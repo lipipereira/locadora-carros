@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 
 class BrandController extends Controller
 {
@@ -17,10 +18,36 @@ class BrandController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $brands = array();
+        if ($request->has('attributes_models')) {
+            $attributes_models = $request->attributes_models;
+            $brands = $this->brand->with('carModels:id,' . $attributes_models);
+        } else {
+            $brands = $this->brand->with('carModels');
+        }
+
+        if ($request->has('filter')) {
+            $filters = explode(';', $request->filter);
+            foreach ($filters as $key => $filter) {
+                $where = explode(':', $filter);
+                $brands = $brands->where($where[0], $where[1], $where[2]);
+            }
+        }
+
+        if ($request->has('attributes_brand')) {
+            $attributes_brand = $request->attributes_brand;
+            $brands = $brands
+                ->selectRaw($attributes_brand)
+                ->get();
+        } else {
+            $brands = $brands->get();
+        }
+
         return response()->json(
-            $this->brand->all(),
+            $brands,
+            //$this->brand->all(),
             Response::HTTP_OK
         );
     }
@@ -32,7 +59,6 @@ class BrandController extends Controller
     {
         $request->validate($this->brand->rules(), $this->brand->feedback());
         $image = $request->file('image');
-        //$image->store('images');
         $image_urn = $image->store('images', 'public');
 
         $brand = $this->brand->create([
@@ -48,7 +74,7 @@ class BrandController extends Controller
      */
     public function show($id)
     {
-        $brand = $this->brand->find($id);
+        $brand = $this->brand->with('carModels')->find($id);
         if ($brand === null) {
             return response()->json(
                 [
@@ -74,6 +100,7 @@ class BrandController extends Controller
                 Response::HTTP_NOT_FOUND
             );
         }
+
         if ($request->method() === 'PATCH') {
             $dynamicRules = array();
 
@@ -88,11 +115,23 @@ class BrandController extends Controller
             $request->validate($brand->rules(), $brand->feedback());
         }
 
-        $brand->update($request->all());
-        return response()->json(
-            $brand,
-            Response::HTTP_OK
-        );
+        if ($request->file('image')) {
+            Storage::disk('public')->delete($brand->image);
+        }
+
+        $image = $request->file('image');
+        $image_urn = $image->store('images', 'public');
+
+        $brand->fill($request->all());
+        $brand->image = $image_urn;
+        $brand->save();
+        /*
+        $brand->update([
+            'name' => $request->name,
+            'image' => $image_urn
+        ]);
+        */
+        return response()->json($brand, Response::HTTP_OK);
     }
 
     /**
@@ -110,9 +149,13 @@ class BrandController extends Controller
             );
         }
 
+        Storage::disk('public')->delete($brand->image);
+
         $this->brand->delete();
         return response()->json(
-            ['mensagem' => 'Marca removida com sucesso!'],
+            [
+                'mensagem' => 'Marca removida com sucesso!'
+            ],
             Response::HTTP_OK
         );
     }
