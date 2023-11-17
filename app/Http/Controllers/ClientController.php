@@ -43,7 +43,7 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $request->validate($this->client->rules(), $this->client->feedback());
-        $client = $this->client->create([$request->all()]);
+        $client = $this->client->create(['name' => $request->name]);
         return response()->json($client, Response::HTTP_CREATED);
     }
 

@@ -8,7 +8,7 @@ abstract class AbstractRepository
 {
     public function __construct(Model $model)
     {
-        $this->mode = $model;
+        $this->model = $model;
     }
 
     public function selectAttributesRegistrationRelated($attributes)
