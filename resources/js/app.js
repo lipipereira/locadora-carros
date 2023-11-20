@@ -15,6 +15,7 @@ const store = createStore({
             transaction: {
                 status: "",
                 message: "",
+                data: "",
             },
         };
     },

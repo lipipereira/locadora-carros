@@ -107,22 +107,16 @@ class BrandController extends Controller
             $request->validate($brand->rules(), $brand->feedback());
         }
 
+        $brand->fill($request->all());
         if ($request->file('image')) {
             Storage::disk('public')->delete($brand->image);
+
+            $image = $request->file('image');
+            $image_urn = $image->store('images', 'public');
+            $brand->image = $image_urn;
         }
-
-        $image = $request->file('image');
-        $image_urn = $image->store('images', 'public');
-
-        $brand->fill($request->all());
-        $brand->image = $image_urn;
         $brand->save();
-        /*
-        $brand->update([
-            'name' => $request->name,
-            'image' => $image_urn
-        ]);
-        */
+
         return response()->json($brand, Response::HTTP_OK);
     }
 

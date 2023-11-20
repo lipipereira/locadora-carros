@@ -6,7 +6,7 @@
                     <th scope="col" v-for="(t, key) in title" :key="key">
                         {{ t.title }}
                     </th>
-                    <th v-if="view.visible || update || remove.visible"></th>
+                    <th v-if="view.visible || update.visible || remove.visible"></th>
                 </tr>
             </thead>
             <tbody>
@@ -26,7 +26,7 @@
                             />
                         </span>
                     </td>
-                    <td v-if="view.visible || update || remove.visible">
+                    <td v-if="view.visible || update.visible || remove.visible">
                         <button
                             v-if="view.visible"
                             class="btn btn-outline-primary btn-sm"
@@ -37,8 +37,12 @@
                             Visualizar
                         </button>
                         <button
-                            v-if="update"
+                            v-if="update.visible"
                             class="btn btn-outline-primary btn-sm"
+                            :data-bs-toggle="update.dataToggle"
+                            :data-bs-target="update.dataTarget"
+                            @click="setStore(obj)"
+
                         >
                             Atualizar
                         </button>
@@ -65,6 +69,7 @@ export default {
         setStore(obj) {
             this.$store.state.transaction.status = "";
             this.$store.state.transaction.message = "";
+            this.$store.state.transaction.data = "";
             this.$store.state.item = obj;
         },
     },

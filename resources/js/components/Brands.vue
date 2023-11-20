@@ -61,7 +61,11 @@
                                 dataToggle: 'modal',
                                 dataTarget: '#modalBrandView',
                             }"
-                            :update="true"
+                            :update="{
+                                visible: true,
+                                dataToggle: 'modal',
+                                dataTarget: '#modalBrandUpdate',
+                            }"
                             :remove="{
                                 visible: true,
                                 dataToggle: 'modal',
@@ -278,6 +282,75 @@
                 </button>
             </template>
         </modal-component>
+
+        <modal-component id="modalBrandUpdate" title="Atualizar marca">
+            <template v-slot:alerts>
+                <alert-component
+                    type="success"
+                    v-if="$store.state.transaction.status === 'sucesso'"
+                    :message="$store.state.transaction"
+                    title="Transação realizada com sucesso"
+                ></alert-component>
+                <alert-component
+                    type="danger"
+                    v-if="$store.state.transaction.status === 'erro'"
+                    :message="$store.state.transaction"
+                    title="Erro na transação realizada com sucesso"
+                ></alert-component>
+            </template>
+            <template v-slot:content>
+                <div class="form-group">
+                    <input-container-component
+                        title="Nome da marca"
+                        id="updateNome"
+                        id-help="updateNomeHelp"
+                        text-help="Informe o nome da marca"
+                    >
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="updateNome"
+                            aria-describedby="updateNomeHelp"
+                            placeholder="Nome da marca"
+                            v-model="$store.state.item.name"
+                        />
+                    </input-container-component>
+                </div>
+                <div class="form-group">
+                    <input-container-component
+                        title="Imagem"
+                        id="updateImagem"
+                        id-help="updateImagemHelp"
+                        text-help="Selecione uma imagem no formato PNG"
+                    >
+                        <input
+                            type="file"
+                            class="form-control"
+                            id="updateImagem"
+                            aria-describedby="updateImagemHelp"
+                            placeholder="Selecione uma imagem"
+                            @change="loadingImage($event)"
+                        />
+                    </input-container-component>
+                </div>
+            </template>
+            <template v-slot:footer>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Fechar
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    @click="updateBrand()"
+                >
+                    Atualizar
+                </button>
+            </template>
+        </modal-component>
     </div>
 </template>
 
@@ -309,6 +382,39 @@ export default {
         };
     },
     methods: {
+        updateBrand() {
+            let formData = new FormData();
+            formData.append("_method", "PATCH");
+            formData.append("name", this.$store.state.item.name);
+            if (this.imageBrand[0]) {
+                formData.append("image", this.imageBrand[0]);
+            }
+
+            let url = this.urlBase + "/" + this.$store.state.item.id;
+
+            let config = {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Accept: "application/json",
+                    Authorization: this.token,
+                },
+            };
+
+            axios
+                .post(url, formData, config)
+                .then((response) => {
+                    this.$store.state.transaction.status = "sucesso";
+                    this.$store.state.transaction.message = 'Registro de marca atualizado com sucesso';
+                    updateImagem.value = "";
+                    this.loadingList();
+                })
+                .catch((errors) => {
+                    console.log(errors.response)
+                    this.$store.state.transaction.status = "erro";
+                    this.$store.state.transaction.message = errors.response.data.message;
+                    this.$store.state.transaction.data = errors.response.data.errors;
+                });
+        },
         remover() {
             let validate = confirm(
                 "Tem certeza que deseja remover esse registro?"
