@@ -59,10 +59,14 @@
                             :view="{
                                 visible: true,
                                 dataToggle: 'modal',
-                                dataTarget: '#modalBrandView'
+                                dataTarget: '#modalBrandView',
                             }"
                             :update="true"
-                            :remove="true"
+                            :remove="{
+                                visible: true,
+                                dataToggle: 'modal',
+                                dataTarget: '#modalBrandRemove',
+                            }"
                             :title="{
                                 id: { title: 'ID', type: 'text' },
                                 name: { title: 'Nome', type: 'text' },
@@ -114,14 +118,14 @@
             <template v-slot:alerts>
                 <alert-component
                     type="success"
-                    v-if="status === 'adicionado'"
-                    :msg="details"
+                    v-if="$store.state.transaction.status === 'sucesso'"
+                    :message="$store.state.transaction"
                     title="Cadastro realizado com sucesso!"
                 ></alert-component>
                 <alert-component
                     type="danger"
-                    v-if="status === 'erro'"
-                    :msg="details"
+                    v-if="$store.state.transaction.status === 'erro'"
+                    :message="$store.state.transaction"
                     title="Erro ao tentar cadastrar a marca"
                 ></alert-component>
             </template>
@@ -162,7 +166,13 @@
                 </div>
             </template>
             <template v-slot:footer>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Fechar
+                </button>
                 <button type="button" class="btn btn-primary" @click="save()">
                     Salvar
                 </button>
@@ -171,9 +181,101 @@
 
         <modal-component id="modalBrandView" title="Visualizar marca">
             <template v-slot:alerts></template>
-            <template v-slot:content>Teste</template>
+            <template v-slot:content>
+                <input-container-component title="ID">
+                    <input
+                        type="text"
+                        class="form-control"
+                        :value="$store.state.item.id"
+                        disabled
+                    />
+                </input-container-component>
+                <input-container-component title="Nome da marca">
+                    <input
+                        type="text"
+                        class="form-control"
+                        :value="$store.state.item.name"
+                        disabled
+                    />
+                </input-container-component>
+                <input-container-component title="Imagem">
+                    <img
+                        :src="'/storage/' + $store.state.item.image"
+                        v-if="$store.state.item.image"
+                    />
+                </input-container-component>
+                <input-container-component title="Data de criação">
+                    <input
+                        type="text"
+                        class="form-control"
+                        :value="$store.state.item.created_at"
+                        disabled
+                    />
+                </input-container-component>
+            </template>
             <template v-slot:footer>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Fechar
+                </button>
+            </template>
+        </modal-component>
+
+        <modal-component id="modalBrandRemove" title="Remover marca">
+            <template v-slot:alerts>
+                <alert-component
+                    type="success"
+                    v-if="$store.state.transaction.status === 'sucesso'"
+                    :message="$store.state.transaction"
+                    title="Transação realizada com sucesso"
+                ></alert-component>
+                <alert-component
+                    type="danger"
+                    v-if="$store.state.transaction.status === 'erro'"
+                    :message="$store.state.transaction"
+                    title="Erro na transação realizada com sucesso"
+                ></alert-component>
+            </template>
+            <template
+                v-slot:content
+                v-if="$store.state.transaction.status != 'sucesso'"
+            >
+                <input-container-component title="ID">
+                    <input
+                        type="text"
+                        class="form-control"
+                        :value="$store.state.item.id"
+                        disabled
+                    />
+                </input-container-component>
+                <input-container-component title="Nome da marca">
+                    <input
+                        type="text"
+                        class="form-control"
+                        :value="$store.state.item.name"
+                        disabled
+                    />
+                </input-container-component>
+            </template>
+            <template v-slot:footer>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Fechar
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="remover()"
+                    v-if="$store.state.transaction.status != 'sucesso'"
+                >
+                    Remover
+                </button>
             </template>
         </modal-component>
     </div>
@@ -197,8 +299,6 @@ export default {
             urlFilter: "",
             nameBrand: "",
             imageBrand: [],
-            status: "",
-            details: {},
             brands: {
                 data: [],
             },
@@ -209,6 +309,40 @@ export default {
         };
     },
     methods: {
+        remover() {
+            let validate = confirm(
+                "Tem certeza que deseja remover esse registro?"
+            );
+            if (!validate) {
+                return false;
+            }
+
+            let formData = new FormData();
+            formData.append("_method", "delete");
+
+            let config = {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: this.token,
+                },
+            };
+
+            let url = this.urlBase + "/" + this.$store.state.item.id;
+
+            axios
+                .post(url, formData, config)
+                .then((response) => {
+                    this.$store.state.transaction.status = "sucesso";
+                    this.$store.state.transaction.message =
+                        response.data.mensagem;
+                    this.loadingList();
+                })
+                .catch((errors) => {
+                    this.$store.state.transaction.status = "erro";
+                    this.$store.state.transaction.message =
+                        errors.response.data.error;
+                });
+        },
         toLookFor() {
             let filter = "";
             for (let keys in this.search) {
@@ -270,17 +404,15 @@ export default {
             axios
                 .post(this.urlBase, formData, config)
                 .then((response) => {
-                    this.status = "adicionado";
-                    this.details = {
-                        message: "ID do registro " + response.data.id,
-                    };
+                    this.$store.state.transaction.status = "sucesso";
+                    this.$store.state.transaction.message =
+                        "ID registrado: " + response.data.id;
+                    this.loadingList();
                 })
                 .catch((errors) => {
-                    this.status = "erro";
-                    this.details = {
-                        message: errors.response.data.message,
-                        data: errors.response.data.errors,
-                    };
+                    this.$store.state.transaction.status = "erro";
+                    this.$store.state.transaction.message =
+                        errors.response.data.message;
                 });
         },
     },

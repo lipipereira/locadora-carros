@@ -4,17 +4,21 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-import './bootstrap';
-import { createApp } from 'vue';
-import { createStore } from 'vuex'
+import "./bootstrap";
+import { createApp } from "vue";
+import { createStore } from "vuex";
 
 const store = createStore({
-    state () {
-      return {
-        teste: 'teste de recuperação'
-      }
-    }
-  })
+    state() {
+        return {
+            item: {},
+            transaction: {
+                status: "",
+                message: "",
+            },
+        };
+    },
+});
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -23,37 +27,37 @@ const store = createStore({
  */
 
 const app = createApp({});
-app.use(store)
+app.use(store);
 
-import ExampleComponent from './components/ExampleComponent.vue';
-app.component('example-component', ExampleComponent);
+import ExampleComponent from "./components/ExampleComponent.vue";
+app.component("example-component", ExampleComponent);
 
-import Login from './components/Login.vue';
-app.component('login-component', Login);
+import Login from "./components/Login.vue";
+app.component("login-component", Login);
 
-import Home from './components/Home.vue';
-app.component('home-component', Home);
+import Home from "./components/Home.vue";
+app.component("home-component", Home);
 
-import Brand from './components/Brands.vue';
-app.component('brand-component', Brand);
+import Brand from "./components/Brands.vue";
+app.component("brand-component", Brand);
 
-import InputContainer from './components/InputContainer.vue';
-app.component('input-container-component', InputContainer);
+import InputContainer from "./components/InputContainer.vue";
+app.component("input-container-component", InputContainer);
 
-import Table from './components/Table.vue';
-app.component('table-component', Table);
+import Table from "./components/Table.vue";
+app.component("table-component", Table);
 
-import Card from './components/Card.vue';
-app.component('card-component', Card);
+import Card from "./components/Card.vue";
+app.component("card-component", Card);
 
-import Modal from './components/Modal.vue';
-app.component('modal-component', Modal);
+import Modal from "./components/Modal.vue";
+app.component("modal-component", Modal);
 
-import Alert from './components/Alert.vue';
-app.component('alert-component', Alert);
+import Alert from "./components/Alert.vue";
+app.component("alert-component", Alert);
 
-import Paginate from './components/Paginate.vue';
-app.component('paginate-component', Paginate);
+import Paginate from "./components/Paginate.vue";
+app.component("paginate-component", Paginate);
 
 /**
  * The following block of code may be used to automatically register your
@@ -73,4 +77,4 @@ app.component('paginate-component', Paginate);
  * scaffolding. Otherwise, you will need to add an element yourself.
  */
 
-app.mount('#app');
+app.mount("#app");

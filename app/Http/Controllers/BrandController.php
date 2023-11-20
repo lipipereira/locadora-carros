@@ -142,8 +142,7 @@ class BrandController extends Controller
         }
 
         Storage::disk('public')->delete($brand->image);
-
-        $this->brand->delete();
+        $brand->delete();
         return response()->json(
             [
                 'mensagem' => 'Marca removida com sucesso!'

@@ -6,7 +6,7 @@
                     <th scope="col" v-for="(t, key) in title" :key="key">
                         {{ t.title }}
                     </th>
-                    <th v-if="view.visible || update || remove"></th>
+                    <th v-if="view.visible || update || remove.visible"></th>
                 </tr>
             </thead>
             <tbody>
@@ -26,12 +26,13 @@
                             />
                         </span>
                     </td>
-                    <td v-if="view.visible || update || remove">
+                    <td v-if="view.visible || update || remove.visible">
                         <button
                             v-if="view.visible"
                             class="btn btn-outline-primary btn-sm"
                             :data-bs-toggle="view.dataToggle"
                             :data-bs-target="view.dataTarget"
+                            @click="setStore(obj)"
                         >
                             Visualizar
                         </button>
@@ -42,8 +43,11 @@
                             Atualizar
                         </button>
                         <button
-                            v-if="remove"
+                            v-if="remove.visible"
                             class="btn btn-outline-danger btn-sm"
+                            :data-bs-toggle="remove.dataToggle"
+                            :data-bs-target="remove.dataTarget"
+                            @click="setStore(obj)"
                         >
                             Remove
                         </button>
@@ -57,6 +61,13 @@
 <script>
 export default {
     props: ["data", "title", "view", "update", "remove"],
+    methods: {
+        setStore(obj) {
+            this.$store.state.transaction.status = "";
+            this.$store.state.transaction.message = "";
+            this.$store.state.item = obj;
+        },
+    },
     computed: {
         dataFilter() {
             let fields = Object.keys(this.title);
