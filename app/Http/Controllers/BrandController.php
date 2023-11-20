@@ -39,7 +39,7 @@ class BrandController extends Controller
         }
 
         return response()->json(
-            $brandRepository->getResult(),
+            $brandRepository->getResultPaginate(5),
             Response::HTTP_OK
         );
     }

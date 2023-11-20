@@ -51,17 +51,51 @@
 
                 <card-component title="Relação de marcas">
                     <template v-slot:content>
-                        <table-component></table-component>
+                        <table-component
+                            :data="brands.data"
+                            :title="{
+                                id: { title: 'ID', type: 'text' },
+                                name: { title: 'Nome', type: 'text' },
+                                image: { title: 'Imagem', type: 'image' },
+                                created_at: {
+                                    title: 'Data de criação',
+                                    type: 'date',
+                                },
+                            }"
+                        ></table-component>
                     </template>
                     <template v-slot:footer>
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-sm float-right"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modalBrand"
-                        >
-                            Adicionar
-                        </button>
+                        <div class="row">
+                            <div class="col-10">
+                                <paginate-component>
+                                    <li
+                                        v-for="(l, key) in brands.links"
+                                        :key="key"
+                                        :class="
+                                            l.active
+                                                ? 'page-item active'
+                                                : 'page-item'
+                                        "
+                                        @click="pagination(l)"
+                                    >
+                                        <a
+                                            class="page-link"
+                                            v-html="l.label"
+                                        ></a>
+                                    </li>
+                                </paginate-component>
+                            </div>
+                            <div class="col">
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm float-right"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalBrand"
+                                >
+                                    Adicionar
+                                </button>
+                            </div>
+                        </div>
                     </template>
                 </card-component>
             </div>
@@ -150,10 +184,36 @@ export default {
             nameBrand: "",
             imageBrand: [],
             status: "",
-            details: [],
+            details: {},
+            brands: {
+                data: [],
+            },
         };
     },
     methods: {
+        pagination(l) {
+            if (l.url) {
+                this.urlBase = l.url;
+                this.loadingList();
+            }
+        },
+        loadingList() {
+            let config = {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: this.token,
+                },
+            };
+
+            axios
+                .get(this.urlBase, config)
+                .then((response) => {
+                    this.brands = response.data;
+                })
+                .catch((errors) => {
+                    console.log(errors);
+                });
+        },
         loadingImage(e) {
             this.imageBrand = e.target.files;
         },
@@ -174,13 +234,21 @@ export default {
                 .post(this.urlBase, formData, config)
                 .then((response) => {
                     this.status = "adicionado";
-                    this.details = response.response;
+                    this.details = {
+                        message: "ID do registro " + response.data.id,
+                    };
                 })
                 .catch((errors) => {
                     this.status = "erro";
-                    this.details = errors.response;
+                    this.details = {
+                        message: errors.response.data.message,
+                        data: errors.response.data.errors,
+                    };
                 });
         },
+    },
+    mounted() {
+        this.loadingList();
     },
 };
 </script>

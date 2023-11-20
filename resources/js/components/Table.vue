@@ -1,35 +1,48 @@
 <template>
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>@twitter</td>
-            </tr>
-        </tbody>
-    </table>
+    <div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" v-for="(t, key) in title" :key="key">
+                        {{ t.title }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(obj, key) in dataFilter" :key="key">
+                    <td v-for="(value, chaveValor) in obj" :key="chaveValor">
+                        <span v-if="title[chaveValor].type == 'text'">{{value}}</span>
+                        <span v-if="title[chaveValor].type == 'date'">{{ "..." + value }}</span>
+                        <span v-if="title[chaveValor].type == 'image'">
+                            <img
+                                :src="'/storage/' + value"
+                                width="30"
+                                height="30"
+                            />
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script>
-export default {};
+export default {
+    props: ["data", "title"],
+    computed: {
+        dataFilter() {
+            let fields = Object.keys(this.title);
+            let dataFilter = [];
+            this.data.map((item, key) => {
+                let itemFilter = {};
+                fields.forEach((field) => {
+                    itemFilter[field] = item[field];
+                });
+                dataFilter.push(itemFilter);
+            });
+            return dataFilter;
+        },
+    },
+};
 </script>
