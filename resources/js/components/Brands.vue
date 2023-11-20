@@ -18,6 +18,7 @@
                                         id="inputId"
                                         aria-describedby="idHelp"
                                         placeholder="ID"
+                                        v-model="search.id"
                                     />
                                 </input-container-component>
                             </div>
@@ -34,6 +35,7 @@
                                         id="nomeHelp"
                                         aria-describedby="nomeHelp"
                                         placeholder="Nome da marca"
+                                        v-model="search.name"
                                     />
                                 </input-container-component>
                             </div>
@@ -43,6 +45,7 @@
                         <button
                             type="submit"
                             class="btn btn-primary btn-sm float-right"
+                            @click="toLookFor()"
                         >
                             Pesquisar
                         </button>
@@ -53,6 +56,13 @@
                     <template v-slot:content>
                         <table-component
                             :data="brands.data"
+                            :view="{
+                                visible: true,
+                                dataToggle: 'modal',
+                                dataTarget: '#modalBrandView'
+                            }"
+                            :update="true"
+                            :remove="true"
                             :title="{
                                 id: { title: 'ID', type: 'text' },
                                 name: { title: 'Nome', type: 'text' },
@@ -152,16 +162,18 @@
                 </div>
             </template>
             <template v-slot:footer>
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                >
-                    Fechar
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-primary" @click="save()">
                     Salvar
                 </button>
+            </template>
+        </modal-component>
+
+        <modal-component id="modalBrandView" title="Visualizar marca">
+            <template v-slot:alerts></template>
+            <template v-slot:content>Teste</template>
+            <template v-slot:footer>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </template>
         </modal-component>
     </div>
@@ -181,6 +193,8 @@ export default {
     data() {
         return {
             urlBase: "http://localhost/api/v1/brand",
+            urlPaginate: "",
+            urlFilter: "",
             nameBrand: "",
             imageBrand: [],
             status: "",
@@ -188,16 +202,39 @@ export default {
             brands: {
                 data: [],
             },
+            search: {
+                id: "",
+                name: "",
+            },
         };
     },
     methods: {
+        toLookFor() {
+            let filter = "";
+            for (let keys in this.search) {
+                if (this.search[keys]) {
+                    if (filter != "") {
+                        filter += ";";
+                    }
+                    filter += keys + ":like:" + this.search[keys];
+                }
+            }
+            if (filter != "") {
+                this.urlPaginate = "page=1";
+                this.urlFilter = "&filter=" + filter;
+            } else {
+                this.urlFilter = "";
+            }
+            this.loadingList();
+        },
         pagination(l) {
             if (l.url) {
-                this.urlBase = l.url;
+                this.urlPaginate = l.url.split("?")[1];
                 this.loadingList();
             }
         },
         loadingList() {
+            let url = this.urlBase + "?" + this.urlPaginate + this.urlFilter;
             let config = {
                 headers: {
                     Accept: "application/json",
@@ -206,7 +243,7 @@ export default {
             };
 
             axios
-                .get(this.urlBase, config)
+                .get(url, config)
                 .then((response) => {
                     this.brands = response.data;
                 })
