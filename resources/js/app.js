@@ -6,6 +6,15 @@
 
 import './bootstrap';
 import { createApp } from 'vue';
+import { createStore } from 'vuex'
+
+const store = createStore({
+    state () {
+      return {
+        teste: 'teste de recuperação'
+      }
+    }
+  })
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -14,6 +23,7 @@ import { createApp } from 'vue';
  */
 
 const app = createApp({});
+app.use(store)
 
 import ExampleComponent from './components/ExampleComponent.vue';
 app.component('example-component', ExampleComponent);
