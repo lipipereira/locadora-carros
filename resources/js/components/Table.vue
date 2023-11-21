@@ -6,7 +6,9 @@
                     <th scope="col" v-for="(t, key) in title" :key="key">
                         {{ t.title }}
                     </th>
-                    <th v-if="view.visible || update.visible || remove.visible"></th>
+                    <th
+                        v-if="view.visible || update.visible || remove.visible"
+                    ></th>
                 </tr>
             </thead>
             <tbody>
@@ -16,7 +18,7 @@
                             value
                         }}</span>
                         <span v-if="title[chaveValor].type == 'date'">{{
-                            "..." + value
+                            $filters.formatDateTime(value)
                         }}</span>
                         <span v-if="title[chaveValor].type == 'image'">
                             <img
@@ -42,7 +44,6 @@
                             :data-bs-toggle="update.dataToggle"
                             :data-bs-target="update.dataTarget"
                             @click="setStore(obj)"
-
                         >
                             Atualizar
                         </button>

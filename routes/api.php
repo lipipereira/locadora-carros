@@ -12,10 +12,10 @@ use App\Http\Controllers\{
 };
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
 
 Route::prefix('v1')->middleware('auth:api')->group(function () {
     Route::post('me', [AuthController::class, 'me'])->name('me');
-    Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     Route::apiResource('client', ClientController::class);
     Route::apiResource('car', CarController::class);

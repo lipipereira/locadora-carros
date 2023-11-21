@@ -30,6 +30,14 @@ const store = createStore({
 const app = createApp({});
 app.use(store);
 
+app.config.globalProperties.$filters = {
+    formatDateTime(value) {
+        const date = new Date(value);
+        // Then specify how you want your dates to be formatted
+        return new Intl.DateTimeFormat("default").format(date);
+    },
+};
+
 import ExampleComponent from "./components/ExampleComponent.vue";
 app.component("example-component", ExampleComponent);
 

@@ -356,15 +356,6 @@
 
 <script>
 export default {
-    computed: {
-        token() {
-            let token = document.cookie.split(";").find((index) => {
-                return index.includes("token=");
-            });
-
-            return "Bearer " + token.split("=")[1];
-        },
-    },
     data() {
         return {
             urlBase: "http://localhost/api/v1/brand",
@@ -395,8 +386,6 @@ export default {
             let config = {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    Accept: "application/json",
-                    Authorization: this.token,
                 },
             };
 
@@ -404,15 +393,18 @@ export default {
                 .post(url, formData, config)
                 .then((response) => {
                     this.$store.state.transaction.status = "sucesso";
-                    this.$store.state.transaction.message = 'Registro de marca atualizado com sucesso';
+                    this.$store.state.transaction.message =
+                        "Registro de marca atualizado com sucesso";
                     updateImagem.value = "";
                     this.loadingList();
                 })
                 .catch((errors) => {
-                    console.log(errors.response)
+                    console.log(errors.response);
                     this.$store.state.transaction.status = "erro";
-                    this.$store.state.transaction.message = errors.response.data.message;
-                    this.$store.state.transaction.data = errors.response.data.errors;
+                    this.$store.state.transaction.message =
+                        errors.response.data.message;
+                    this.$store.state.transaction.data =
+                        errors.response.data.errors;
                 });
         },
         remover() {
@@ -426,17 +418,10 @@ export default {
             let formData = new FormData();
             formData.append("_method", "delete");
 
-            let config = {
-                headers: {
-                    Accept: "application/json",
-                    Authorization: this.token,
-                },
-            };
-
             let url = this.urlBase + "/" + this.$store.state.item.id;
 
             axios
-                .post(url, formData, config)
+                .post(url, formData)
                 .then((response) => {
                     this.$store.state.transaction.status = "sucesso";
                     this.$store.state.transaction.message =
@@ -475,15 +460,9 @@ export default {
         },
         loadingList() {
             let url = this.urlBase + "?" + this.urlPaginate + this.urlFilter;
-            let config = {
-                headers: {
-                    Accept: "application/json",
-                    Authorization: this.token,
-                },
-            };
 
             axios
-                .get(url, config)
+                .get(url)
                 .then((response) => {
                     this.brands = response.data;
                 })
@@ -502,8 +481,6 @@ export default {
             let config = {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    Accept: "application/json",
-                    Authorization: this.token,
                 },
             };
 

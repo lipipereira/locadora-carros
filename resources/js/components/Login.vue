@@ -121,8 +121,7 @@ export default {
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.token) {
-                        document.cookie =
-                            "token=" + data.token + ";SameSite=Lax";
+                        document.cookie = "token=" + data.token + ";SameSite=Lax";
                     }
                 })
                 .then(e.target.submit());
